@@ -7,8 +7,10 @@ const socketIo = require('socket.io');
 const cors = require('cors');
 const { ExpressPeerServer } = require('peer');
 const { register, login, verifyToken, getProfile } = require('./auth');
+const { PrismaClient } = require('@prisma/client');
 
 const app = express();
+const prisma = new PrismaClient();
 
 // Determine if we should use HTTPS (development) or HTTP (production/Render)
 const useHttps = process.env.NODE_ENV !== 'production' && process.env.USE_HTTPS !== 'false';
