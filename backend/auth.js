@@ -185,7 +185,15 @@ async function register(req, res) {
 		});
 	} catch (error) {
 		console.error('Registration error:', error);
-		res.status(500).json({ error: 'Failed to register user' });
+		console.error('Error details:', {
+			message: error.message,
+			stack: error.stack,
+			code: error.code
+		});
+		res.status(500).json({ 
+			error: 'Failed to register user',
+			details: process.env.NODE_ENV === 'development' ? error.message : undefined
+		});
 	}
 }
 

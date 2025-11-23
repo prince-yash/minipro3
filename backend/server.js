@@ -12,6 +12,20 @@ const { PrismaClient } = require('@prisma/client');
 const app = express();
 const prisma = new PrismaClient();
 
+// Test Prisma connection on startup
+prisma.$connect()
+  .then(() => {
+    console.log('✅ Prisma connected to database successfully');
+    return prisma.user.count();
+  })
+  .then((count) => {
+    console.log(`📊 Current user count: ${count}`);
+  })
+  .catch((err) => {
+    console.error('❌ Prisma connection failed:', err.message);
+    console.error('⚠️  Will fall back to file-based storage if available');
+  });
+
 // Determine if we should use HTTPS (development) or HTTP (production/Render)
 const useHttps = process.env.NODE_ENV !== 'production' && process.env.USE_HTTPS !== 'false';
 let server;
