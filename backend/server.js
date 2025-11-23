@@ -41,19 +41,62 @@ if (useHttps) {
 }
 const io = socketIo(server, {
   cors: {
-    origin: process.env.NODE_ENV === 'production' 
-      ? [process.env.FRONTEND_URL, process.env.RENDER_EXTERNAL_URL].filter(Boolean)
-      : (origin, callback) => callback(null, true), // Allow any origin in development
+    origin: (origin, callback) => {
+      const allowedSocketOrigins = process.env.NODE_ENV === 'production' 
+        ? [process.env.FRONTEND_URL, process.env.RENDER_EXTERNAL_URL].filter(Boolean)
+        : true;
+      
+      if (allowedSocketOrigins === true) {
+        callback(null, true);
+      } else if (Array.isArray(allowedSocketOrigins) && allowedSocketOrigins.length === 0) {
+        // No origins configured - allow all (fallback)
+        callback(null, true);
+      } else if (!origin || allowedSocketOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ["GET", "POST"],
     credentials: true
   }
 });
 
 // Middleware
+// CORS configuration with debugging
+const allowedOrigins = process.env.NODE_ENV === 'production' 
+  ? [process.env.FRONTEND_URL, process.env.RENDER_EXTERNAL_URL].filter(Boolean)
+  : true;
+
+console.log('🌐 CORS Configuration:');
+console.log('  NODE_ENV:', process.env.NODE_ENV);
+console.log('  FRONTEND_URL:', process.env.FRONTEND_URL);
+console.log('  RENDER_EXTERNAL_URL:', process.env.RENDER_EXTERNAL_URL);
+console.log('  Allowed origins:', allowedOrigins);
+
 app.use(cors({ 
-  origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL, process.env.RENDER_EXTERNAL_URL].filter(Boolean)
-    : true, // Allow any origin in development
+  origin: (origin, callback) => {
+    console.log('  Incoming origin:', origin);
+    
+    if (allowedOrigins === true) {
+      // Development mode - allow all
+      callback(null, true);
+    } else if (Array.isArray(allowedOrigins) && allowedOrigins.length === 0) {
+      // No origins configured - allow all in production (fallback)
+      console.warn('  ⚠️  No CORS origins configured, allowing all origins');
+      callback(null, true);
+    } else if (Array.isArray(allowedOrigins)) {
+      // Check if origin is in allowed list
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        console.warn('  ❌ Origin not allowed:', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
+    } else {
+      callback(null, true);
+    }
+  },
   credentials: true 
 }));
 app.use(express.json());
