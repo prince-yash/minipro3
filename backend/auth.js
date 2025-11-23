@@ -1,9 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { PrismaClient } = require('@prisma/client');
 require('dotenv').config();
 
-const prisma = new PrismaClient();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key-change-me';
 const JWT_EXPIRY = '7d'; // Token expires in 7 days
