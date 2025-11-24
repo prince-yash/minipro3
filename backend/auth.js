@@ -4,10 +4,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-// Try to initialize Prisma client; if it fails, use file-based storage fallback
 let prisma = null;
 try {
-	// eslint-disable-next-line global-require
 	const { PrismaClient } = require('@prisma/client');
 	prisma = new PrismaClient();
 	console.log('Prisma client initialized');
@@ -16,7 +14,6 @@ try {
 	prisma = null;
 }
 
-// File-based storage details (fallback)
 const DATA_DIR = path.join(__dirname, 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 

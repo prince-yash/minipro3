@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Test Authentication Endpoints
 
 echo "================================"
 echo "Testing EduCanvas Live Auth API"
@@ -53,7 +52,6 @@ echo "$ADMIN_RESPONSE" | jq '.'
 ADMIN_TOKEN=$(echo "$ADMIN_RESPONSE" | jq -r '.token')
 echo ""
 
-# Test 4: Login with student credentials
 echo "4. Logging in as student..."
 curl -s -X POST $BASE_URL/api/auth/login \
   -H "Content-Type: application/json" \
@@ -63,13 +61,11 @@ curl -s -X POST $BASE_URL/api/auth/login \
   }' | jq '.'
 echo ""
 
-# Test 5: Get student profile
 echo "5. Getting student profile..."
 curl -s -X GET $BASE_URL/api/auth/profile \
   -H "Authorization: Bearer $STUDENT_TOKEN" | jq '.'
 echo ""
-
-# Test 6: Get admin profile
+student
 echo "6. Getting admin profile..."
 curl -s -X GET $BASE_URL/api/auth/profile \
   -H "Authorization: Bearer $ADMIN_TOKEN" | jq '.'

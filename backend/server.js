@@ -12,46 +12,41 @@ const { PrismaClient } = require('@prisma/client');
 const app = express();
 const prisma = new PrismaClient();
 
-// Test Prisma connection on startup
 prisma.$connect()
   .then(() => {
-    console.log('✅ Prisma connected to database successfully');
+    console.log('Prisma connected to database successfully');
     return prisma.user.count();
   })
   .then((count) => {
-    console.log(`📊 Current user count: ${count}`);
+    console.log(`Current user count: ${count}`);
   })
   .catch((err) => {
-    console.error('❌ Prisma connection failed:', err.message);
-    console.error('⚠️  Will fall back to file-based storage if available');
+    console.error('Prisma connection failed:', err.message);
+    console.error(' Will fall back to file-based storage if available');
   });
 
-// Determine if we should use HTTPS (development) or HTTP (production/Render)
 const useHttps = process.env.NODE_ENV !== 'production' && process.env.USE_HTTPS !== 'false';
 let server;
 
 if (useHttps) {
-  // SSL certificate configuration for development
   const certsPath = path.join(__dirname, '..', 'certs');
   const keyPath = path.join(certsPath, 'key.pem');
   const certPath = path.join(certsPath, 'cert.pem');
   
-  // Check if certificates exist
   if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
     const sslOptions = {
       key: fs.readFileSync(keyPath),
       cert: fs.readFileSync(certPath)
     };
     server = https.createServer(sslOptions, app);
-    console.log('🔒 Using HTTPS for development');
+    console.log('Using HTTPS for development');
   } else {
-    console.log('⚠️  SSL certificates not found, falling back to HTTP');
+    console.log('SSL certificates not found, falling back to HTTP');
     server = http.createServer(app);
   }
 } else {
-  // Use HTTP for production (Render handles SSL termination)
   server = http.createServer(app);
-  console.log('🌐 Using HTTP for production (SSL handled by load balancer)');
+  console.log(' Using HTTP for production (SSL handled by load balancer)');
 }
 const io = socketIo(server, {
   cors: {
@@ -63,7 +58,6 @@ const io = socketIo(server, {
       if (allowedSocketOrigins === true) {
         callback(null, true);
       } else if (Array.isArray(allowedSocketOrigins) && allowedSocketOrigins.length === 0) {
-        // No origins configured - allow all (fallback)
         callback(null, true);
       } else if (!origin || allowedSocketOrigins.indexOf(origin) !== -1) {
         callback(null, true);
@@ -82,7 +76,7 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
   ? [process.env.FRONTEND_URL, process.env.RENDER_EXTERNAL_URL].filter(Boolean)
   : true;
 
-console.log('🌐 CORS Configuration:');
+console.log('CORS Configuration:');
 console.log('  NODE_ENV:', process.env.NODE_ENV);
 console.log('  FRONTEND_URL:', process.env.FRONTEND_URL);
 console.log('  RENDER_EXTERNAL_URL:', process.env.RENDER_EXTERNAL_URL);
@@ -93,18 +87,15 @@ app.use(cors({
     console.log('  Incoming origin:', origin);
     
     if (allowedOrigins === true) {
-      // Development mode - allow all
       callback(null, true);
     } else if (Array.isArray(allowedOrigins) && allowedOrigins.length === 0) {
-      // No origins configured - allow all in production (fallback)
-      console.warn('  ⚠️  No CORS origins configured, allowing all origins');
+      console.warn('   No CORS origins configured, allowing all origins');
       callback(null, true);
     } else if (Array.isArray(allowedOrigins)) {
-      // Check if origin is in allowed list
       if (!origin || allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
-        console.warn('  ❌ Origin not allowed:', origin);
+        console.warn('   Origin not allowed:', origin);
         callback(new Error('Not allowed by CORS'));
       }
     } else {
@@ -115,7 +106,6 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Trust proxy (required for Render)
 if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
@@ -193,9 +183,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Jitsi Meet handles all WebRTC signaling internally
-  // No need for manual WebRTC signaling anymore
-
+  
   // PeerJS video conference events
   // New peer announces readiness and receives list of existing peers
   socket.on('peer_ready', (data) => {
@@ -208,7 +196,6 @@ io.on('connection', (socket) => {
         return;
       }
       
-      // If user already has a different peerId, they're reconnecting
       if (user.peerId) {
         console.log(`${user.name} changing peer ID from ${user.peerId} to ${peerId}`);
       }
@@ -478,16 +465,16 @@ server.listen(PORT, '0.0.0.0', () => {
   const protocol = useHttps ? 'https' : 'http';
   const host = process.env.RENDER_EXTERNAL_URL || `${protocol}://localhost:${PORT}`;
   
-  console.log(`🚀 EduCanvas Live server running on port ${PORT}`);
-  console.log(`📹 PeerJS signaling available at ${host}/peerjs`);
-  console.log(`📊 Health check: ${host}/health`);
-  console.log(`🔐 Admin code: ${appState.adminCode}`);
+  console.log(` EduCanvas Live server running on port ${PORT}`);
+  console.log(`PeerJS signaling available at ${host}/peerjs`);
+  console.log(`Health check: ${host}/health`);
+  console.log(`Admin code: ${appState.adminCode}`);
   
   if (useHttps) {
-    console.log(`⚠️  Note: Accept self-signed certificate in browser`);
+    console.log(`  Note: Accept self-signed certificate in browser`);
   }
   
   if (process.env.NODE_ENV === 'production') {
-    console.log(`🌐 External URL: ${process.env.RENDER_EXTERNAL_URL}`);
+    console.log(` External URL: ${process.env.RENDER_EXTERNAL_URL}`);
   }
 });
