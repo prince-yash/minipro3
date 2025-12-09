@@ -84,7 +84,6 @@ const Classroom: React.FC<ClassroomProps> = ({ socket, userRole, userName, onLea
         return newUsers;
       });
       
-      // Video users are now handled by Jitsi Meet
     });
 
     socket.on('new_message', (message) => {
@@ -96,7 +95,6 @@ const Classroom: React.FC<ClassroomProps> = ({ socket, userRole, userName, onLea
     });
 
     socket.on('draw_data', (data) => {
-      // Handle drawing on canvas
       drawOnCanvas(data);
     });
 
@@ -125,7 +123,6 @@ const Classroom: React.FC<ClassroomProps> = ({ socket, userRole, userName, onLea
       onLeaveSession();
     });
 
-    // PeerJS video call event listeners
     socket.on('peer_joined', (data) => {
       const { peerId, userName, userRole } = data;
       setVideoParticipants(prev => ({
@@ -145,7 +142,7 @@ const Classroom: React.FC<ClassroomProps> = ({ socket, userRole, userName, onLea
       setVideoParticipants(prev => {
         const newParticipants = { ...prev };
         const userToRemove = Object.entries(newParticipants).find(
-          ([name, peer]) => peer.role // We don't store peerId but this will work for cleanup
+          ([name, peer]) => peer.role 
         );
         if (userToRemove) {
           delete newParticipants[userToRemove[0]];
@@ -172,7 +169,6 @@ const Classroom: React.FC<ClassroomProps> = ({ socket, userRole, userName, onLea
   }, [socket, onLeaveSession, localUserId]);
 
   useEffect(() => {
-    // Scroll to bottom of chat
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
@@ -193,7 +189,6 @@ const Classroom: React.FC<ClassroomProps> = ({ socket, userRole, userName, onLea
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        // Fill white background
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
@@ -206,7 +201,6 @@ const Classroom: React.FC<ClassroomProps> = ({ socket, userRole, userName, onLea
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      // Backward compatibility: map legacy type to tool
       const toolType: 'pen' | 'eraser' | 'line' | 'rect' | 'circle' = data.tool || (data.type === 'erase' ? 'eraser' : 'pen');
 
       ctx.lineWidth = data.size || brushSize;
@@ -223,7 +217,6 @@ const Classroom: React.FC<ClassroomProps> = ({ socket, userRole, userName, onLea
         return;
       }
 
-      // Shapes (always draw in source-over)
       ctx.globalCompositeOperation = 'source-over';
       ctx.strokeStyle = data.color || currentColor;
       const x1 = data.fromX, y1 = data.fromY, x2 = data.toX, y2 = data.toY;
@@ -271,7 +264,6 @@ const Classroom: React.FC<ClassroomProps> = ({ socket, userRole, userName, onLea
     if (tool === 'line' || tool === 'rect' || tool === 'circle') {
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        // Take a snapshot for live preview
         canvasSnapshotRef.current = ctx.getImageData(0, 0, canvas.width, canvas.height);
       }
     }
@@ -306,7 +298,6 @@ const Classroom: React.FC<ClassroomProps> = ({ socket, userRole, userName, onLea
       return;
     }
 
-    // Shape preview: restore snapshot and draw preview shape without emitting
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -344,7 +335,6 @@ const Classroom: React.FC<ClassroomProps> = ({ socket, userRole, userName, onLea
         color: currentColor,
         size: brushSize
       };
-      // Already drawn in preview; just emit
       socket.emit('draw_data', shapeData);
     }
 
@@ -373,11 +363,9 @@ const Classroom: React.FC<ClassroomProps> = ({ socket, userRole, userName, onLea
 
   const handleCloseVideo = () => {
     setShowVideoCall(false);
-    // Clean up video participants
     setVideoParticipants({});
   };
 
-  // Add tab state for sidebar
   const [activeTab, setActiveTab] = useState<'video' | 'chat' | 'participants'>('video');
 
   return (
@@ -472,7 +460,6 @@ const Classroom: React.FC<ClassroomProps> = ({ socket, userRole, userName, onLea
         </div>
       </div>
 
-      {/* Admin Panel Overlay */}
       {showAdminPanel && userRole === 'admin' && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 flex items-center justify-center p-4">
           <div className="glass-dark rounded-xl p-6 w-full max-w-2xl border border-purple-500/30 relative animate-fade-in">
@@ -489,7 +476,6 @@ const Classroom: React.FC<ClassroomProps> = ({ socket, userRole, userName, onLea
             </h2>
 
             <div className="space-y-4">
-              {/* Global Controls */}
               <div className="glass p-4 rounded-lg border border-purple-500/20">
                 <h3 className="text-lg font-semibold text-purple-300 mb-3">Global Controls</h3>
                 <div className="flex items-center space-x-4">
@@ -513,7 +499,6 @@ const Classroom: React.FC<ClassroomProps> = ({ socket, userRole, userName, onLea
                 </div>
               </div>
 
-              {/* User Management */}
               <div className="glass p-4 rounded-lg border border-cyan-500/20">
                 <h3 className="text-lg font-semibold text-cyan-300 mb-3">User Management ({Object.keys(users).length} users)</h3>
                 <div className="max-h-60 overflow-y-auto space-y-2">
@@ -789,7 +774,6 @@ const Classroom: React.FC<ClassroomProps> = ({ socket, userRole, userName, onLea
                   )}
                   
                   <div className="space-y-2">
-                    {/* Drawing Status */}
                     <div className="text-xs text-center">
                       {(() => {
                         const currentUser = users[localUserId];
